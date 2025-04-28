@@ -1,0 +1,9 @@
+<svg width="60" height="40" viewBox="0 0 60 40" xmlns="http://www.w3.org/2000/svg">
+  <g>
+    <ellipse cx="30" cy="28" rx="22" ry="8" fill="#8e24aa"/>
+    <ellipse cx="30" cy="22" rx="12" ry="6" fill="#ce93d8"/>
+    <ellipse cx="18" cy="30" rx="3" ry="3" fill="#ffeb3b" id="ufo-light1"/>
+    <ellipse cx="30" cy="32" rx="3" ry="3" fill="#00e676" id="ufo-light2"/>
+    <ellipse cx="42" cy="30" rx="3" ry="3" fill="#ff1744" id="ufo-light3"/>
+  </g>
+</svg> 

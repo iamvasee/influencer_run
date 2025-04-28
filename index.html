@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Influencer On The Run</title>
+    <meta name="description" content="After a scandalous afterparty meltdown, a rising social media star finds herself sprinting through the city streets in only her lingerie — dodging creeps, stalkers, paparazzi, and random chaos — all while trying to save her reputation (and dignity).">
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="game-container">
+        <canvas id="gameCanvas"></canvas>
+        <div id="gameOver" class="game-over hidden">
+            <h2>GAME OVER</h2>
+            <div class="game-over-views">
+                <span class="game-over-eye-icon">
+                    <svg width="28" height="28" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" style="vertical-align:middle;"><ellipse cx="10" cy="10" rx="8" ry="6" stroke="white" stroke-width="2" fill="none"/><circle cx="10" cy="10" r="3" fill="white"/></svg>
+                </span>
+                <span id="gameOverViews">0</span>
+            </div>
+            <p>Rewards Collected:</p>
+            <div id="finalRewards" class="final-rewards"></div>
+            <button onclick="startGame()">PLAY AGAIN</button>
+            <div class="shortcut-hint">Press SPACE or ↑ to restart</div>
+        </div>
+        <div id="gameStart" class="game-start-popup">
+            <img src="Assets/169poster.png" alt="Influencer On The Run Poster" class="start-poster">
+            <div class="start-glass-bar">
+                <div class="start-info-content">
+                    <div class="start-info-title">Why Are You Running?</div>
+                    <div class="start-info-message">
+                        Less clothes, more views. You're live, barely dressed, and breaking the internet one step at a time. Dodge creeps, outrun cameras, and streak your way to stardom.
+                    </div>
+                </div>
+                <div class="start-instructions">
+                    <span class="key-icon subtle">&#8679;</span>
+                    <span class="key-icon subtle">␣</span>
+                    <button class="start-btn" onclick="hideStartPopupAndBegin()">Start Game</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="rewards.js"></script>
+    <script src="container.js"></script>
+    <script src="Sky.js"></script>
+    <script src="cityscape.js"></script>
+    <script src="game.js"></script>
+    <script src="ground.js"></script>
+    <script>
+    function hideStartPopupAndBegin() {
+        document.getElementById('gameStart').classList.add('hidden');
+        startGame();
+    }
+    // Show start popup on load
+    window.addEventListener('load', function() {
+        document.getElementById('gameStart').classList.remove('hidden');
+        // Prevent game from running until start is pressed
+        cancelAnimationFrame(window.gameLoop);
+    });
+    </script>
+</body>
+</html> 

@@ -1,0 +1,8 @@
+<svg width="60" height="40" viewBox="0 0 60 40" xmlns="http://www.w3.org/2000/svg">
+  <g>
+    <rect x="10" y="18" width="40" height="8" rx="4" fill="#2196f3"/>
+    <polygon points="50,20 58,16 58,24 50,20" fill="#1976d2"/>
+    <rect x="5" y="22" width="10" height="4" rx="2" fill="#90caf9"/>
+    <ellipse cx="54" cy="20" rx="2.5" ry="2.5" fill="#fff" id="plane-light"/>
+  </g>
+</svg> 
