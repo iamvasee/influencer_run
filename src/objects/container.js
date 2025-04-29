@@ -34,7 +34,7 @@ class GameContainer {
         for (const [emoji, count] of Object.entries(collectedRewards)) {
             const rewardItem = document.createElement('div');
             rewardItem.className = 'reward-item';
-            rewardItem.innerHTML = `${emoji} × ${count}`;
+            rewardItem.innerHTML = `${emoji} ${count}`;
             this.finalRewardsElement.appendChild(rewardItem);
         }
     }

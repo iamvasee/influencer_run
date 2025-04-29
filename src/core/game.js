@@ -21,6 +21,10 @@ let gameLoop;
 let isGameOver = false;
 let rewards = [];
 const REWARD_SIZE = 50;
+let obstaclesDodged = 0;  // Track number of obstacles dodged
+let streamDuration = 0;   // Track stream duration in seconds
+let streamStartTime;      // Track when stream started
+const passedObstacles = new Set();  // Track which obstacles have been passed
 
 // Define ground level
 const GROUND_LEVEL = canvas.height - 250;
@@ -47,9 +51,9 @@ window.gameSpeed = gameSpeed;
 
 // Load player images
 const playerImage = new Image();
-playerImage.src = 'Assets/player.png';
+playerImage.src = 'Assets/player poses/player.png';
 const jumpImage = new Image();
-jumpImage.src = 'Assets/jump1.png';
+jumpImage.src = 'Assets/player poses/jump1.png';
 
 // Dust effect state
 let playerDustPuffs = [];
@@ -122,6 +126,9 @@ function checkRewardCollision() {
             totalRewardPoints += reward.points;
             collectedRewards[reward.emoji] = (collectedRewards[reward.emoji] || 0) + 1;
             
+            // Play reward sound
+            window.soundManager.play('reward');
+            
             // Remove collected reward
             rewards.splice(index, 1);
             
@@ -132,13 +139,18 @@ function checkRewardCollision() {
 }
 
 function displayFinalRewards() {
-    finalRewardsElement.innerHTML = '';
-    for (const [emoji, count] of Object.entries(collectedRewards)) {
-        const rewardItem = document.createElement('div');
-        rewardItem.className = 'reward-item';
-        rewardItem.innerHTML = `${emoji} × ${count}`;
-        finalRewardsElement.appendChild(rewardItem);
+    // Get all reward cells
+    const rewardCells = document.querySelectorAll('.reward-cell');
+    
+    // Update each cell's count based on collected rewards
+    rewardCells.forEach(cell => {
+        const emoji = cell.textContent.split(' ')[0]; // Get the emoji
+        const count = collectedRewards[emoji] || 0;
+        const span = cell.querySelector('span');
+        if (span) {
+            span.textContent = `${count}`;
     }
+    });
 }
 
 function drawStaticScene() {
@@ -156,10 +168,32 @@ function drawStaticScene() {
 function gameOver() {
     isGameOver = true;
     cancelAnimationFrame(gameLoop);
-    drawStaticScene(); // Keep ground and background visible
+    update(); // Draw final scene
+    
+    // Calculate final stats
+    const hours = Math.floor(streamDuration / 3600);
+    const minutes = Math.floor((streamDuration % 3600) / 60);
+    const seconds = streamDuration % 60;
+    const duration = `${hours > 0 ? hours + 'h ' : ''}${minutes}m ${seconds}s`;
+    
+    // Update stats display
+    document.getElementById('streamDuration').textContent = duration;
+    document.getElementById('viewerCount').textContent = totalRewardPoints;
+    document.getElementById('obstacleCount').textContent = obstaclesDodged;
+    
+    // Display collected rewards
     displayFinalRewards();
-    const viewsElem = document.getElementById('gameOverViews');
-    if (viewsElem) viewsElem.textContent = totalRewardPoints;
+    
+    // Update game over message with the message from the last hit obstacle
+    const gameOverMessageElem = document.getElementById('gameOverMessage');
+    if (gameOverMessageElem && window.lastHitObstacle && window.lastHitObstacle.type) {
+        gameOverMessageElem.textContent = window.lastHitObstacle.type.gameOverMessage;
+    }
+    
+    // Play end stream sound
+    window.soundManager.play('gameOver');
+    
+    // Show end stream screen
     gameOverElement.classList.remove('hidden');
 }
 
@@ -170,6 +204,9 @@ function jump() {
         
         // First jump is stronger than second
         player.velocityY = player.jumpCount === 1 ? -player.jumpForce : -player.doubleJumpForce;
+        
+        // Play jump sound
+        window.soundManager.play('jump');
     }
 }
 
@@ -220,97 +257,13 @@ function drawPlayerDust() {
     }
 }
 
-function drawLiveCounter() {
-    const ctx = window.ctx;
-    const padding = 32;
-    // LIVE badge
-    const liveText = 'LIVE';
-    ctx.save();
-    ctx.font = '700 22px Space Grotesk, Arial, sans-serif';
-    const liveWidth = ctx.measureText(liveText).width + 36;
-    const liveHeight = 36;
-    
-    // Calculate dynamic width for eye badge based on number of digits
-    const viewCountText = totalRewardPoints.toString();
-    ctx.font = '500 20px Space Grotesk, Arial, sans-serif';
-    const viewCountWidth = ctx.measureText(viewCountText).width;
-    const eyeIconWidth = 20; // Width of the eye icon
-    const eyeIconPadding = 18; // Padding around the eye icon
-    const eyeBadgeWidth = Math.max(70, eyeIconWidth + eyeIconPadding + viewCountWidth + 20); // Minimum 70px, or wider if needed
-    const eyeBadgeHeight = 36; // Add back the missing height variable
-    
-    const gap = 10; // small gap between badges
-    const eyeX = window.canvas.width - padding - eyeBadgeWidth;
-    const eyeY = padding;
-    const liveX = eyeX - liveWidth - gap;
-    const liveY = padding;
-    // Gradient for LIVE
-    const grad = ctx.createLinearGradient(liveX, liveY, liveX + liveWidth, liveY + liveHeight);
-    grad.addColorStop(0, '#ff007a');
-    grad.addColorStop(1, '#ff4e50');
-    ctx.fillStyle = grad;
-    ctx.strokeStyle = 'rgba(255,255,255,0.10)';
-    ctx.lineWidth = 1.5;
-    ctx.beginPath();
-    ctx.moveTo(liveX + 12, liveY);
-    ctx.lineTo(liveX + liveWidth - 12, liveY);
-    ctx.quadraticCurveTo(liveX + liveWidth, liveY, liveX + liveWidth, liveY + 12);
-    ctx.lineTo(liveX + liveWidth, liveY + liveHeight - 12);
-    ctx.quadraticCurveTo(liveX + liveWidth, liveY + liveHeight, liveX + liveWidth - 12, liveY + liveHeight);
-    ctx.lineTo(liveX + 12, liveY + liveHeight);
-    ctx.quadraticCurveTo(liveX, liveY + liveHeight, liveX, liveY + liveHeight - 12);
-    ctx.lineTo(liveX, liveY + 12);
-    ctx.quadraticCurveTo(liveX, liveY, liveX + 12, liveY);
-    ctx.closePath();
-    ctx.fill();
-    ctx.stroke();
-    ctx.fillStyle = '#fff';
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.fillText(liveText, liveX + liveWidth / 2, liveY + liveHeight / 2);
-    ctx.restore();
-
-    // Eye badge
-    ctx.save();
-    ctx.beginPath();
-    ctx.moveTo(eyeX + 12, eyeY);
-    ctx.lineTo(eyeX + eyeBadgeWidth - 12, eyeY);
-    ctx.quadraticCurveTo(eyeX + eyeBadgeWidth, eyeY, eyeX + eyeBadgeWidth, eyeY + 12);
-    ctx.lineTo(eyeX + eyeBadgeWidth, eyeY + eyeBadgeHeight - 12);
-    ctx.quadraticCurveTo(eyeX + eyeBadgeWidth, eyeY + eyeBadgeHeight, eyeX + eyeBadgeWidth - 12, eyeY + eyeBadgeHeight);
-    ctx.lineTo(eyeX + 12, eyeY + eyeBadgeHeight);
-    ctx.quadraticCurveTo(eyeX, eyeY + eyeBadgeHeight, eyeX, eyeY + eyeBadgeHeight - 12);
-    ctx.lineTo(eyeX, eyeY + 12);
-    ctx.quadraticCurveTo(eyeX, eyeY, eyeX + 12, eyeY);
-    ctx.closePath();
-    ctx.fillStyle = '#18181b';
-    ctx.shadowColor = 'rgba(0,0,0,0.10)';
-    ctx.shadowBlur = 6;
-    ctx.fill();
-    ctx.shadowBlur = 0;
-    // Draw eye icon
-    ctx.save();
-    ctx.translate(eyeX + 20, eyeY + eyeBadgeHeight / 2);
-    ctx.strokeStyle = '#fff';
-    ctx.lineWidth = 2;
-    ctx.beginPath();
-    ctx.ellipse(0, 0, 8, 6, 0, 0, 2 * Math.PI);
-    ctx.stroke();
-    ctx.beginPath();
-    ctx.arc(0, 0, 3, 0, 2 * Math.PI);
-    ctx.fillStyle = '#fff';
-    ctx.fill();
-    ctx.restore();
-    // Draw reward value
-    ctx.fillStyle = '#fff';
-    ctx.font = '500 20px Space Grotesk, Arial, sans-serif';
-    ctx.textAlign = 'left';
-    ctx.textBaseline = 'middle';
-    ctx.fillText(totalRewardPoints, eyeX + 38, eyeY + eyeBadgeHeight / 2);
-    ctx.restore();
-}
-
 function update() {
+    // Update stream duration
+    streamDuration = Math.floor((Date.now() - streamStartTime) / 1000);
+    
+    // Clear the canvas first
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    
     // Clip to rounded rectangle
     ctx.save();
     ctx.beginPath();
@@ -327,17 +280,13 @@ function update() {
     ctx.closePath();
     ctx.clip();
 
-    // Draw red sky background
-    if (typeof window.drawSky === 'function') {
-        window.drawSky();
-    }
-    // Update and draw cityscape (skyline, buildings, flying objects)
-    if (typeof window.updateCityscape === 'function') {
-        window.updateCityscape();
-    }
-    if (typeof window.drawCityscape === 'function') {
-        window.drawCityscape();
-    }
+    // Apply camera transform if zooming
+    window.camera?.update(ctx);
+
+    // Draw background elements
+    window.drawSky?.();
+    window.updateCityscape?.();
+    window.drawCityscape?.();
     
     // Update player
     if (player.jumping) {
@@ -351,48 +300,48 @@ function update() {
         }
     }
 
-    // Spawn and update player dust
+    // Update game objects
     spawnPlayerDust();
     updatePlayerDust();
     
-    // Update obstacles and rewards
+    // Update obstacles and flash effects
+    window.updatePaparazziFlashEffects?.();
     window.updateObstacles(gameSpeed, rewards, createReward, REWARD_SIZE);
-    // Move rewards left and filter out off-screen rewards
+    
+    // Update rewards
     rewards = rewards.filter(reward => reward.x > -reward.size);
     rewards.forEach(reward => {
         reward.x -= gameSpeed;
     });
     
-    // Update ground elements
-    if (typeof window.updateGround === 'function') {
-        window.updateGround();
-    }
-    
     // Check collisions
     for (let obstacle of window.obstacles) {
-        if (checkCollision(player, obstacle)) {
-            ctx.restore();
-            gameOver();
+        if (checkObstacleCollision(obstacle)) {
             return;
         }
     }
-    
-    // Check reward collisions
     checkRewardCollision();
     
     // Draw everything else
-    if (typeof window.drawGround === 'function') {
-        window.drawGround();
-    }
+    window.drawGround?.();
     drawPlayerDust();
     drawPlayer();
     window.drawObstacles();
     drawRewards();
-    drawLiveCounter();
+    
+    // Draw HUD elements
+    window.drawProfile?.();
+    window.drawLiveCounter?.(totalRewardPoints);
+    
+    // Reset camera transform if zooming
+    window.camera?.reset(ctx);
     
     ctx.restore();
-    // Continue game loop
+    
+    // Continue game loop if not game over
+    if (!isGameOver) {
     gameLoop = requestAnimationFrame(update);
+    }
 }
 
 function startGame() {
@@ -402,19 +351,30 @@ function startGame() {
     gameSpeed = 7;
     window.gameSpeed = gameSpeed;
     window.obstacles = [];
+    window.lastHitObstacle = null;
     rewards = [];
     isGameOver = false;
+    obstaclesDodged = 0;
+    passedObstacles.clear();  // Clear passed obstacles
+    streamStartTime = Date.now();
+    
+    // Reset player
     player.y = GROUND_LEVEL;
     player.jumping = false;
     player.jumpCount = 0;
     player.velocityY = 0;
     
-    // Initialize ground if available
-    if (typeof window.initGround === 'function') {
-        window.initGround();
+    // Initialize systems
+    window.camera?.init();
+    window.soundManager?.init();
+    window.initGround?.();
+    
+    // Clear any existing game loop
+    if (gameLoop) {
+        cancelAnimationFrame(gameLoop);
     }
     
-    // Reset UI
+    // Hide end stream screen
     gameOverElement.classList.add('hidden');
     
     // Start game loop
@@ -423,7 +383,12 @@ function startGame() {
 
 // Start game when page loads
 window.addEventListener('load', () => {
-    startGame();
+    // Hide game over screen initially
+    gameOverElement.classList.add('hidden');
+    // Show start popup
+    document.getElementById('gameStart').classList.remove('hidden');
+    // Prevent game from running until start is pressed
+    cancelAnimationFrame(window.gameLoop);
 });
 
 // Event listeners
@@ -436,3 +401,22 @@ document.addEventListener('keydown', (event) => {
         startGame();
     }
 });
+
+// Update obstacle collision check to track dodged obstacles
+function checkObstacleCollision(obstacle) {
+    if (checkCollision(player, obstacle)) {
+        window.lastHitObstacle = obstacle;
+        ctx.restore();
+        window.camera?.reset(ctx);
+        gameOver();
+        return true;
+    }
+    
+    // Only increment if the obstacle has been passed and hasn't been counted yet
+    if (player.x > obstacle.x + obstacle.width && !passedObstacles.has(obstacle)) {
+        obstaclesDodged++;
+        passedObstacles.add(obstacle);
+    }
+    
+    return false;
+}

@@ -13,25 +13,67 @@
     <div class="game-container">
         <canvas id="gameCanvas"></canvas>
         <div id="gameOver" class="game-over hidden">
-            <h2>GAME OVER</h2>
-            <div class="game-over-views">
-                <span class="game-over-eye-icon">
-                    <svg width="28" height="28" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" style="vertical-align:middle;"><ellipse cx="10" cy="10" rx="8" ry="6" stroke="white" stroke-width="2" fill="none"/><circle cx="10" cy="10" r="3" fill="white"/></svg>
-                </span>
-                <span id="gameOverViews">0</span>
+            <div class="game-over-content">
+                <div class="game-over-left">
+                    <img src="Assets/posters/poster.png" alt="Stream Ended Poster" class="game-over-poster">
+                </div>
+                <div class="game-over-right">
+                    <h2>LIVE STREAM TERMINATED</h2>
+                    <div class="game-stats">
+                        <div class="stat-item">
+                            <i class="fas fa-clock"></i>
+                            <span id="streamDuration">0m 0s</span>
+                        </div>
+                        <div class="stat-item">
+                            <i class="fas fa-eye"></i>
+                            <span id="viewerCount">0</span>
+                        </div>
+                        <div class="stat-item">
+                            <i class="fas fa-running"></i>
+                            <span id="obstacleCount">0</span>
+                        </div>
+                    </div>
+                    <div id="gameOverMessage" class="game-over-message"></div>
+                    <div class="rewards-container">
+                        <h3 class="rewards-title">Objects Collected</h3>
+                        <div class="rewards-grid">
+                            <!-- Row 1 -->
+                            <div class="reward-cell">🌸 <span>0</span></div>
+                            <div class="reward-cell">👙 <span>0</span></div>
+                            <div class="reward-cell">👠 <span>0</span></div>
+                            <div class="reward-cell">💄 <span>0</span></div>
+                            <div class="reward-cell">🍑 <span>0</span></div>
+                            <div class="reward-cell">🍒 <span>0</span></div>
+
+                            <!-- Row 2 -->
+                            <div class="reward-cell">🍆 <span>0</span></div>
+                            <div class="reward-cell">👅 <span>0</span></div>
+                            <div class="reward-cell">💦 <span>0</span></div>
+                            <div class="reward-cell">💋 <span>0</span></div>
+                            <div class="reward-cell">⭐ <span>0</span></div>
+                            <div class="reward-cell">📸 <span>0</span></div>
+
+                            <!-- Row 3 -->
+                            <div class="reward-cell">🎉 <span>0</span></div>
+                            <div class="reward-cell">🌆 <span>0</span></div>
+                            <div class="reward-cell">👜 <span>0</span></div>
+                            <div class="reward-cell">🕶️ <span>0</span></div>
+                            <div class="reward-cell">💋 <span>0</span></div>
+                            <div class="reward-cell">💎 <span>0</span></div>
+                        </div>
+                    </div>
+                    <div class="action-buttons">
+                        <button onclick="startGame()" class="start-stream-btn"><span>START NEW STREAM</span></button>
+                        <button id="gameOverMenuButton" class="menu-button" title="Menu">
+                            <i class="fas fa-bars"></i>
+                        </button>
+                    </div>
+                    <div class="shortcut-hint">Press SPACE or ↑ to start a new stream</div>
+                </div>
             </div>
-            <p>Rewards Collected:</p>
-            <div id="finalRewards" class="final-rewards"></div>
-            <div class="game-over-buttons">
-                <button onclick="startGame()" title="Play Again">PLAY AGAIN</button>
-                <button id="gameOverMenuButton" class="menu-button" title="Menu">
-                    <i class="fas fa-bars"></i>
-                </button>
-            </div>
-            <div class="shortcut-hint">Press SPACE or ↑ to restart</div>
         </div>
         <div id="gameStart" class="game-start-popup">
-            <img src="Assets/169poster.png" alt="Influencer On The Run Poster" class="start-poster">
+            <img src="Assets/posters/169poster.png" alt="Influencer On The Run Poster" class="start-poster">
             <button id="menuButton" class="menu-button" title="Menu">
                 <i class="fas fa-bars"></i>
             </button>
@@ -66,29 +108,33 @@
                     <a href="https://iamvasee.com" target="_blank" rel="noopener" title="Website">
                         <i class="fas fa-globe"></i>
                     </a>
-                    <a href="https://github.com/yourusername/game-repo" target="_blank" rel="noopener" title="GitHub">
+                    <a href="https://github.com/iamvasee/ior" target="_blank" rel="noopener" title="GitHub">
                         <i class="fab fa-github"></i>
                     </a>
-                    <a href="https://twitter.com/yourusername" target="_blank" rel="noopener" title="Twitter">
-                        <i class="fab fa-twitter"></i>
+                    <a href="https://twitter.com/iamvasee" target="_blank" rel="noopener" title="X">
+                        <i class="fab fa-x"></i>
                     </a>
-                    <a href="https://instagram.com/yourusername" target="_blank" rel="noopener" title="Instagram">
+                    <a href="https://instagram.com/iamvasee" target="_blank" rel="noopener" title="Instagram">
                         <i class="fab fa-instagram"></i>
                     </a>
-                    <a href="https://reddit.com/r/yourgamesubreddit" target="_blank" rel="noopener" title="Reddit">
+                    <a href="https://reddit.com/r/iamvasee" target="_blank" rel="noopener" title="Reddit">
                         <i class="fab fa-reddit"></i>
                     </a>
                 </div>
             </div>
         </div>
     </div>
-    <script src="rewards.js"></script>
-    <script src="container.js"></script>
-    <script src="obstacles.js"></script>
-    <script src="Sky.js"></script>
-    <script src="cityscape.js"></script>
-    <script src="game.js"></script>
-    <script src="ground.js"></script>
+    <script src="src/objects/rewards.js"></script>
+    <script src="src/objects/container.js"></script>
+    <script src="src/objects/obstacles.js"></script>
+    <script src="src/objects/flash.js"></script>
+    <script src="src/environment/sky.js"></script>
+    <script src="src/environment/cityscape.js"></script>
+    <script src="src/ui/hud.js"></script>
+    <script src="src/core/camera.js"></script>
+    <script src="src/core/sound.js"></script>
+    <script src="src/core/game.js"></script>
+    <script src="src/environment/ground.js"></script>
     <script>
     function hideStartPopupAndBegin() {
         document.getElementById('gameStart').classList.add('hidden');

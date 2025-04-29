@@ -91,6 +91,9 @@ const REWARDS = {
     }
 };
 
+// Make REWARDS available globally
+window.REWARDS = REWARDS;
+
 // Helper function to get random reward based on probability
 function getRandomReward() {
     const rand = Math.random();
