@@ -7,6 +7,7 @@
     <meta name="description" content="After a scandalous afterparty meltdown, a rising social media star finds herself sprinting through the city streets in only her lingerie — dodging creeps, stalkers, paparazzi, and random chaos — all while trying to save her reputation (and dignity).">
     <link rel="stylesheet" href="style.css">
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 </head>
 <body>
     <div class="game-container">
@@ -21,11 +22,19 @@
             </div>
             <p>Rewards Collected:</p>
             <div id="finalRewards" class="final-rewards"></div>
-            <button onclick="startGame()">PLAY AGAIN</button>
+            <div class="game-over-buttons">
+                <button onclick="startGame()" title="Play Again">PLAY AGAIN</button>
+                <button id="gameOverMenuButton" class="menu-button" title="Menu">
+                    <i class="fas fa-bars"></i>
+                </button>
+            </div>
             <div class="shortcut-hint">Press SPACE or ↑ to restart</div>
         </div>
         <div id="gameStart" class="game-start-popup">
             <img src="Assets/169poster.png" alt="Influencer On The Run Poster" class="start-poster">
+            <button id="menuButton" class="menu-button" title="Menu">
+                <i class="fas fa-bars"></i>
+            </button>
             <div class="start-glass-bar">
                 <div class="start-info-content">
                     <div class="start-info-title">Why Are You Running?</div>
@@ -40,9 +49,42 @@
                 </div>
             </div>
         </div>
+
+        <!-- Menu Popup -->
+        <div id="menuPopup" class="menu-popup hidden">
+            <div class="menu-content">
+                <button class="close-menu" title="Close Menu">
+                    <i class="fas fa-times"></i>
+                </button>
+                <h2>Influencer On The Run</h2>
+                <p class="version">Version 1.0</p>
+                <p class="developer">Developer: iamvasee.com</p>
+                <p class="description">
+                    This game is built publicly, which means anyone can suggest features and contribute to its development. Join our community and help shape the future of the game!
+                </p>
+                <div class="social-links">
+                    <a href="https://iamvasee.com" target="_blank" rel="noopener" title="Website">
+                        <i class="fas fa-globe"></i>
+                    </a>
+                    <a href="https://github.com/yourusername/game-repo" target="_blank" rel="noopener" title="GitHub">
+                        <i class="fab fa-github"></i>
+                    </a>
+                    <a href="https://twitter.com/yourusername" target="_blank" rel="noopener" title="Twitter">
+                        <i class="fab fa-twitter"></i>
+                    </a>
+                    <a href="https://instagram.com/yourusername" target="_blank" rel="noopener" title="Instagram">
+                        <i class="fab fa-instagram"></i>
+                    </a>
+                    <a href="https://reddit.com/r/yourgamesubreddit" target="_blank" rel="noopener" title="Reddit">
+                        <i class="fab fa-reddit"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
     </div>
     <script src="rewards.js"></script>
     <script src="container.js"></script>
+    <script src="obstacles.js"></script>
     <script src="Sky.js"></script>
     <script src="cityscape.js"></script>
     <script src="game.js"></script>
@@ -52,6 +94,27 @@
         document.getElementById('gameStart').classList.add('hidden');
         startGame();
     }
+
+    // Menu functionality
+    document.getElementById('menuButton').addEventListener('click', function() {
+        document.getElementById('menuPopup').classList.remove('hidden');
+    });
+
+    document.getElementById('gameOverMenuButton').addEventListener('click', function() {
+        document.getElementById('menuPopup').classList.remove('hidden');
+    });
+
+    document.querySelector('.close-menu').addEventListener('click', function() {
+        document.getElementById('menuPopup').classList.add('hidden');
+    });
+
+    // Close menu when clicking outside
+    document.getElementById('menuPopup').addEventListener('click', function(e) {
+        if (e.target === this) {
+            this.classList.add('hidden');
+        }
+    });
+
     // Show start popup on load
     window.addEventListener('load', function() {
         document.getElementById('gameStart').classList.remove('hidden');

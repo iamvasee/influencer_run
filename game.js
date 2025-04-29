@@ -1,3 +1,5 @@
+// At the top of game.js, ensure obstacles.js is loaded before this file in index.html
+
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
 const finalRewardsElement = document.getElementById('finalRewards');
@@ -17,6 +19,8 @@ let collectedRewards = {};
 let gameSpeed = 7;
 let gameLoop;
 let isGameOver = false;
+let rewards = [];
+const REWARD_SIZE = 50;
 
 // Define ground level
 const GROUND_LEVEL = canvas.height - 250;
@@ -47,16 +51,6 @@ playerImage.src = 'Assets/player.png';
 const jumpImage = new Image();
 jumpImage.src = 'Assets/jump1.png';
 
-// Obstacles and Rewards
-let obstacles = [];
-let rewards = [];
-const obstacleWidth = 40;
-const MIN_OBSTACLE_HEIGHT = 80;
-const MAX_OBSTACLE_HEIGHT = 140;  // Slightly reduced max height
-const MIN_OBSTACLE_GAP = 400;
-const MAX_OBSTACLE_GAP = 600;
-const REWARD_SIZE = 50;
-
 // Dust effect state
 let playerDustPuffs = [];
 
@@ -70,15 +64,6 @@ function drawPlayer() {
     }
 }
 
-function drawBackground() {
-    // Create gradient background
-    const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
-    gradient.addColorStop(0, '#1a1a2e');    // Darker at top
-    gradient.addColorStop(1, '#222233');    // Slightly lighter at bottom
-    ctx.fillStyle = gradient;
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-}
-
 function drawGround() {
     ctx.strokeStyle = '#333';
     ctx.lineWidth = 2;
@@ -90,21 +75,6 @@ function drawGround() {
     // Add ground fill
     ctx.fillStyle = 'rgba(51, 51, 51, 0.3)';
     ctx.fillRect(0, GROUND_LEVEL + player.height, canvas.width, canvas.height - (GROUND_LEVEL + player.height));
-}
-
-function getRandomNumber(min, max) {
-    return Math.floor(Math.random() * (max - min + 1)) + min;
-}
-
-function createObstacle() {
-    const height = getRandomNumber(MIN_OBSTACLE_HEIGHT, MAX_OBSTACLE_HEIGHT);
-    return {
-        x: canvas.width,
-        y: GROUND_LEVEL + player.height - height,
-        width: obstacleWidth,
-        height: height,
-        gap: getRandomNumber(MIN_OBSTACLE_GAP, MAX_OBSTACLE_GAP)
-    };
 }
 
 function createReward(x) {
@@ -122,42 +92,12 @@ function createReward(x) {
     };
 }
 
-function drawObstacles() {
-    ctx.fillStyle = '#FF5252';
-    obstacles.forEach(obstacle => {
-        ctx.fillRect(obstacle.x, obstacle.y, obstacle.width, obstacle.height);
-    });
-}
-
 function drawRewards() {
     rewards.forEach(reward => {
         ctx.font = `${reward.size}px Arial`;
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
         ctx.fillText(reward.emoji, reward.x + reward.size/2, reward.y + reward.size/2);
-    });
-}
-
-function updateObstacles() {
-    if (obstacles.length === 0 || 
-        obstacles[obstacles.length - 1].x < canvas.width - obstacles[obstacles.length - 1].gap) {
-        obstacles.push(createObstacle());
-        
-        // 70% chance to spawn a reward with each obstacle (increased from 50%)
-        if (Math.random() < 0.7) {
-            rewards.push(createReward(canvas.width + getRandomNumber(0, 100)));
-        }
-    }
-    
-    obstacles = obstacles.filter(obstacle => obstacle.x > -obstacle.width);
-    obstacles.forEach(obstacle => {
-        obstacle.x -= gameSpeed;
-    });
-    
-    // Update rewards
-    rewards = rewards.filter(reward => reward.x > -reward.size);
-    rewards.forEach(reward => {
-        reward.x -= gameSpeed;
     });
 }
 
@@ -408,15 +348,20 @@ function update() {
     updatePlayerDust();
     
     // Update obstacles and rewards
-    updateObstacles();
-
+    window.updateObstacles(gameSpeed, rewards, createReward, REWARD_SIZE);
+    // Move rewards left and filter out off-screen rewards
+    rewards = rewards.filter(reward => reward.x > -reward.size);
+    rewards.forEach(reward => {
+        reward.x -= gameSpeed;
+    });
+    
     // Update ground elements
     if (typeof window.updateGround === 'function') {
         window.updateGround();
     }
     
     // Check collisions
-    for (let obstacle of obstacles) {
+    for (let obstacle of window.obstacles) {
         if (checkCollision(player, obstacle)) {
             ctx.restore();
             gameOver();
@@ -433,7 +378,7 @@ function update() {
     }
     drawPlayerDust();
     drawPlayer();
-    drawObstacles();
+    window.drawObstacles();
     drawRewards();
     drawLiveCounter();
     
@@ -448,7 +393,7 @@ function startGame() {
     collectedRewards = {};
     gameSpeed = 7;
     window.gameSpeed = gameSpeed;
-    obstacles = [];
+    window.obstacles = [];
     rewards = [];
     isGameOver = false;
     player.y = GROUND_LEVEL;
