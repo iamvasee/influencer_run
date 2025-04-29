@@ -229,8 +229,16 @@ function drawLiveCounter() {
     ctx.font = '700 22px Space Grotesk, Arial, sans-serif';
     const liveWidth = ctx.measureText(liveText).width + 36;
     const liveHeight = 36;
-    const eyeBadgeWidth = 70;
-    const eyeBadgeHeight = 36;
+    
+    // Calculate dynamic width for eye badge based on number of digits
+    const viewCountText = totalRewardPoints.toString();
+    ctx.font = '500 20px Space Grotesk, Arial, sans-serif';
+    const viewCountWidth = ctx.measureText(viewCountText).width;
+    const eyeIconWidth = 20; // Width of the eye icon
+    const eyeIconPadding = 18; // Padding around the eye icon
+    const eyeBadgeWidth = Math.max(70, eyeIconWidth + eyeIconPadding + viewCountWidth + 20); // Minimum 70px, or wider if needed
+    const eyeBadgeHeight = 36; // Add back the missing height variable
+    
     const gap = 10; // small gap between badges
     const eyeX = window.canvas.width - padding - eyeBadgeWidth;
     const eyeY = padding;

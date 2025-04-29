@@ -97,18 +97,39 @@ function loadSVGImage(path, callback) {
 function createFlyingObject() {
     // Randomly choose type and direction
     const type = Math.random() < 0.7 ? 'airplane' : 'ufo';
-    const direction = Math.random() < 0.5 ? 'right' : 'left';
-    const y = Math.random() * 120 + 40;
-    let x, speed, img, colorVariant;
-    if (direction === 'right') {
-        x = -70;
-        speed = Math.random() * 1.5 + 2.2;
-        img = type === 'airplane' ? CITYSCAPE.airplaneRightImg : CITYSCAPE.ufoImg;
+    let direction, y, x, speed, img, colorVariant;
+    
+    if (type === 'airplane') {
+        // For airplanes, direction is determined by the image type
+        // airplane-left.svg flies from left to right
+        // airplane-right.svg flies from right to left
+        if (Math.random() < 0.5) {
+            direction = 'right';
+            x = -70;
+            speed = Math.random() * 1.5 + 2.2;
+            img = CITYSCAPE.airplaneLeftImg; // Using left image for right direction
+        } else {
+            direction = 'left';
+            x = window.canvas.width + 70;
+            speed = -(Math.random() * 1.5 + 2.2);
+            img = CITYSCAPE.airplaneRightImg; // Using right image for left direction
+        }
     } else {
-        x = window.canvas.width + 70;
-        speed = -(Math.random() * 1.5 + 2.2);
-        img = type === 'airplane' ? CITYSCAPE.airplaneLeftImg : CITYSCAPE.ufoImg;
+        // For UFOs, keep the random direction
+        direction = Math.random() < 0.5 ? 'right' : 'left';
+        if (direction === 'right') {
+            x = -70;
+            speed = Math.random() * 1.5 + 2.2;
+            img = CITYSCAPE.ufoImg;
+        } else {
+            x = window.canvas.width + 70;
+            speed = -(Math.random() * 1.5 + 2.2);
+            img = CITYSCAPE.ufoImg;
+        }
     }
+    
+    y = Math.random() * 120 + 40;
+    
     // Color variant for UFOs
     if (type === 'ufo') {
         const colors = [
@@ -118,6 +139,7 @@ function createFlyingObject() {
         ];
         colorVariant = colors[Math.floor(Math.random() * colors.length)];
     }
+    
     return {
         type,
         direction,
