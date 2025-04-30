@@ -89,7 +89,7 @@ Set in a neon-lit, chaotic cityscape, the game follows an influencer who has tra
 
 ## 🔮 Development Notes
 - The game is built publicly and welcomes community contributions
-- Version 1.0 focuses on core gameplay mechanics
+- Day 2 focuses on performance optimization and resource efficiency
 - Future updates can expand:
   - Additional character customization options
   - New obstacle types
