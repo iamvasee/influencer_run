@@ -58,6 +58,30 @@ jumpImage.src = 'Assets/player poses/jump1.png';
 // Dust effect state
 let playerDustPuffs = [];
 
+// Add environment state
+let currentEnvironment = 'cityscape';
+let nextEnvironment = 'suburb';
+let environmentSwitchDistance = 0;
+let transitionProgress = 0;
+const ENVIRONMENT_SWITCH_INTERVAL = 5000; // Switch every 5000 units
+const TRANSITION_DURATION = 1000; // Transition over 1000 units
+
+// Initialize environments
+function initEnvironments() {
+    if (typeof window.initSky === 'function') {
+        window.initSky();
+    }
+    if (typeof window.initCityscape === 'function') {
+        window.initCityscape();
+    }
+    if (typeof window.initSuburb === 'function') {
+        window.initSuburb();
+    }
+    if (typeof window.initGround === 'function') {
+        window.initGround();
+    }
+}
+
 // Game functions
 function drawPlayer() {
     // Draw the player image
@@ -154,12 +178,45 @@ function displayFinalRewards() {
 }
 
 function drawStaticScene() {
+    // Clear the canvas first
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    
+    // Always draw the sky first
     if (typeof window.drawSky === 'function') {
         window.drawSky();
     }
-    if (typeof window.drawCityscape === 'function') {
-        window.drawCityscape();
+
+    // Draw both environments during transition
+    if (transitionProgress > 0) {
+        // Draw current environment with fading opacity
+        ctx.save();
+        ctx.globalAlpha = 1 - transitionProgress;
+        if (currentEnvironment === 'cityscape' && typeof window.drawCityscape === 'function') {
+            window.drawCityscape();
+        } else if (currentEnvironment === 'suburb' && typeof window.drawSuburb === 'function') {
+            window.drawSuburb();
+        }
+        ctx.restore();
+
+        // Draw next environment with increasing opacity
+        ctx.save();
+        ctx.globalAlpha = transitionProgress;
+        if (nextEnvironment === 'cityscape' && typeof window.drawCityscape === 'function') {
+            window.drawCityscape();
+        } else if (nextEnvironment === 'suburb' && typeof window.drawSuburb === 'function') {
+            window.drawSuburb();
+        }
+        ctx.restore();
+    } else {
+        // Draw only current environment when not transitioning
+        if (currentEnvironment === 'cityscape' && typeof window.drawCityscape === 'function') {
+            window.drawCityscape();
+        } else if (currentEnvironment === 'suburb' && typeof window.drawSuburb === 'function') {
+            window.drawSuburb();
+        }
     }
+
+    // Always draw the ground last
     if (typeof window.drawGround === 'function') {
         window.drawGround();
     }
@@ -261,32 +318,48 @@ function update() {
     // Update stream duration
     streamDuration = Math.floor((Date.now() - streamStartTime) / 1000);
     
-    // Clear the canvas first
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    // Update environment switch
+    environmentSwitchDistance += gameSpeed;
     
-    // Clip to rounded rectangle
-    ctx.save();
-    ctx.beginPath();
-    const r = 25;
-    ctx.moveTo(r, 0);
-    ctx.lineTo(canvas.width - r, 0);
-    ctx.quadraticCurveTo(canvas.width, 0, canvas.width, r);
-    ctx.lineTo(canvas.width, canvas.height - r);
-    ctx.quadraticCurveTo(canvas.width, canvas.height, canvas.width - r, canvas.height);
-    ctx.lineTo(r, canvas.height);
-    ctx.quadraticCurveTo(0, canvas.height, 0, canvas.height - r);
-    ctx.lineTo(0, r);
-    ctx.quadraticCurveTo(0, 0, r, 0);
-    ctx.closePath();
-    ctx.clip();
+    // Handle environment transition
+    if (environmentSwitchDistance >= ENVIRONMENT_SWITCH_INTERVAL) {
+        if (transitionProgress === 0) {
+            // Start transition
+            nextEnvironment = currentEnvironment === 'cityscape' ? 'suburb' : 'cityscape';
+            transitionProgress = 0.01; // Start transition
+        }
+    }
+    
+    // Update transition progress
+    if (transitionProgress > 0) {
+        transitionProgress += gameSpeed / TRANSITION_DURATION;
+        if (transitionProgress >= 1) {
+            // Complete transition
+            currentEnvironment = nextEnvironment;
+            transitionProgress = 0;
+            environmentSwitchDistance = 0;
+        }
+    }
+    
+    // Update both environments during transition
+    if (transitionProgress > 0) {
+        if (typeof window.updateCityscape === 'function') {
+            window.updateCityscape();
+        }
+        if (typeof window.updateSuburb === 'function') {
+            window.updateSuburb();
+        }
+    } else {
+        // Update only current environment when not transitioning
+        if (currentEnvironment === 'cityscape' && typeof window.updateCityscape === 'function') {
+            window.updateCityscape();
+        } else if (currentEnvironment === 'suburb' && typeof window.updateSuburb === 'function') {
+            window.updateSuburb();
+        }
+    }
 
-    // Apply camera transform if zooming
-    window.camera?.update(ctx);
-
-    // Draw background elements
-    window.drawSky?.();
-    window.updateCityscape?.();
-    window.drawCityscape?.();
+    // Draw the static scene
+    drawStaticScene();
     
     // Update player
     if (player.jumping) {
@@ -323,7 +396,6 @@ function update() {
     checkRewardCollision();
     
     // Draw everything else
-    window.drawGround?.();
     drawPlayerDust();
     drawPlayer();
     window.drawObstacles();
@@ -332,11 +404,6 @@ function update() {
     // Draw HUD elements
     window.drawProfile?.();
     window.drawLiveCounter?.(totalRewardPoints);
-    
-    // Reset camera transform if zooming
-    window.camera?.reset(ctx);
-    
-    ctx.restore();
     
     // Continue game loop if not game over
     if (!isGameOver) {
@@ -355,7 +422,7 @@ function startGame() {
     rewards = [];
     isGameOver = false;
     obstaclesDodged = 0;
-    passedObstacles.clear();  // Clear passed obstacles
+    passedObstacles.clear();
     streamStartTime = Date.now();
     
     // Reset player
@@ -364,10 +431,12 @@ function startGame() {
     player.jumpCount = 0;
     player.velocityY = 0;
     
+    // Initialize environments
+    initEnvironments();
+    
     // Initialize systems
     window.camera?.init();
     window.soundManager?.init();
-    window.initGround?.();
     
     // Clear any existing game loop
     if (gameLoop) {
@@ -381,8 +450,11 @@ function startGame() {
     update();
 }
 
-// Start game when page loads
+// Initialize on load
 window.addEventListener('load', () => {
+    // Initialize environments
+    initEnvironments();
+    
     // Hide game over screen initially
     gameOverElement.classList.add('hidden');
     // Show start popup

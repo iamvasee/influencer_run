@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="30" height="20" viewBox="0 0 30 20" xmlns="http://www.w3.org/2000/svg">
+    <path d="M5,10 C5,5 10,5 10,10 C10,15 15,15 15,10 C15,5 20,5 20,10" stroke="#333" stroke-width="2" fill="none"/>
+    <path d="M20,10 L25,5" stroke="#333" stroke-width="2" fill="none"/>
+    <path d="M20,10 L25,15" stroke="#333" stroke-width="2" fill="none"/>
+</svg> 

@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="60" height="100" viewBox="0 0 60 100" xmlns="http://www.w3.org/2000/svg">
+    <!-- Trunk -->
+    <rect x="25" y="70" width="10" height="30" fill="#5D4037"/>
+    <!-- Tree layers -->
+    <path d="M0 70 L30 20 L60 70 Z" fill="#1B5E20"/>
+    <path d="M5 60 L30 15 L55 60 Z" fill="#2E7D32"/>
+    <path d="M10 50 L30 10 L50 50 Z" fill="#388E3C"/>
+</svg> 

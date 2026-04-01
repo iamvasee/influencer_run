@@ -1,9 +1,9 @@
 // Sound management module
 const sounds = {
-    cameraClick: new Audio('Assets/sounds/camera-click.mp3'),
-    gameOver: new Audio('Assets/sounds/game-over.mp3'),
-    reward: new Audio('Assets/sounds/reward.mp3'),
-    jump: new Audio('Assets/sounds/jump.mp3')
+    cameraClick: new Audio('Assets/SFX/camera-click.mp3'),
+    gameOver: new Audio('Assets/SFX/game-over.mp3'),
+    reward: new Audio('Assets/SFX/reward.mp3'),
+    jump: new Audio('Assets/SFX/jump.mp3')
 };
 
 // Initialize sounds
